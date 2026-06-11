@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AuraFinance — Premium Personal Wealth Planner</title>
+  <meta name="description" content="A comprehensive personal financial management system focused on tracking income, expenses, investments, loans, and real-time net worth.">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Chart.js CDN with fail-safe fallback -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- 1. GLOBAL LOADING SPINNER OVERLAY -->
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- 2. TOAST NOTIFICATION CONTAINER -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- =========================================================================
+       A. AUTHENTICATION SHELL (LOGIN / REGISTRATION)
+       ========================================================================= -->
+  <div id="auth-shell">
+    <div class="card auth-container">
+      <div class="auth-logo-center">
+        <div class="auth-logo-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <h1 class="auth-logo-title">AuraFinance</h1>
+        <p class="text-muted" style="font-size: 0.9rem;">Premium Personal Wealth Planner</p>
+      </div>
+
+      <!-- Auth Error Alert Box -->
+      <div id="auth-error-box" class="text-danger" style="margin-bottom: 1.5rem; text-align: center; font-weight: 600; display: none;"></div>
+
+      <!-- LOGIN FORM -->
+      <form id="login-form">
+        <div class="form-group mb-3">
+          <label for="login-username">Username</label>
+          <input type="text" id="login-username" placeholder="e.g. Archana" required autocomplete="username">
+        </div>
+        <div class="form-group mb-4">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Sign In to Dashboard</button>
+      </form>
+
+      <!-- REGISTRATION FORM -->
+      <form id="register-form" style="display: none;">
+        <div class="form-group mb-3">
+          <label for="register-username">Username</label>
+          <input type="text" id="register-username" placeholder="e.g. Archana" required autocomplete="username">
+        </div>
+        <div class="form-group mb-3">
+          <label for="register-password">Password</label>
+          <input type="password" id="register-password" placeholder="Choose a secure password" required autocomplete="new-password">
+        </div>
+        <div class="form-group mb-4">
+          <label for="register-opening-balance">Opening Cash Balance ($)</label>
+          <input type="number" id="register-opening-balance" value="0" min="0" step="0.01" required>
+        </div>
+        <button type="submit" class="btn btn-success" style="width: 100%;">Create Account</button>
+      </form>
+
+      <div class="auth-toggle-prompt">
+        <span id="auth-prompt-text">Don't have an account?</span>
+        <span class="auth-toggle-link" id="auth-toggle-btn">Sign Up</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       B. MAIN APPLICATION SHELL
+       ========================================================================= -->
+  <div id="app-shell" style="display: none;">
+    <!-- LEFT SIDEBAR CONTAINER -->
+    <aside class="sidebar" id="sidebar-element">
+      <div class="logo-container">
+        <div class="logo-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <span class="logo-text">AuraFinance</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#/dashboard" class="nav-link" id="nav-dashboard">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z"></path>
+          </svg>
+          Dashboard
+        </a>
+        <a href="#/income" class="nav-link" id="nav-income">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          Income
+        </a>
+        <a href="#/expenses" class="nav-link" id="nav-expenses">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          Expenses
+        </a>
+        <a href="#/investments" class="nav-link" id="nav-investments">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+          </svg>
+          Investments
+        </a>
+        <a href="#/loans" class="nav-link" id="nav-loans">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          Loans & Debts
+        </a>
+        <a href="#/reports" class="nav-link" id="nav-reports">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+          </svg>
+          Reports
+        </a>
+        <a href="#/settings" class="nav-link" id="nav-settings">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+          Settings
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-avatar" id="sidebar-avatar">A</div>
+        <div class="user-details">
+          <span class="user-name" id="sidebar-username">Archana</span>
+          <span class="user-role">Single User Vault</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT PORTAL VIEWPORT -->
+    <main class="app-viewport">
+      <!-- HEADER CONTROL BAR -->
+      <header class="top-bar">
+        <div class="sidebar-mobile-toggle" id="sidebar-mobile-toggle-btn">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </div>
+        <div class="page-title-area">
+          <h2 class="page-title" id="page-title-heading">Dashboard Overview</h2>
+          <span class="page-subtitle" id="page-subtitle-heading">Track your overall net worth, balances, and allocations.</span>
+        </div>
+        <div class="header-actions">
+          <button class="theme-toggle-btn" id="theme-toggle-trigger" aria-label="Toggle Light/Dark Theme">
+            <!-- Sun Icon (visible in dark theme) -->
+            <svg id="theme-icon-sun" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"></path>
+            </svg>
+            <!-- Moon Icon (visible in light theme) -->
+            <svg id="theme-icon-moon" style="display:none;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+            </svg>
+          </button>
+          <button class="logout-btn" id="logout-trigger">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+            </svg>
+            Sign Out
+          </button>
+        </div>
+      </header>
+
+      <!-- =========================================================================
+           1. VIEW: DASHBOARD
+           ========================================================================= -->
+      <div id="dashboard-view" class="view-container active-view">
+        <!-- KPI summary deck -->
+        <div class="dashboard-grid-kpi">
+          <div class="card kpi-card kpi-net-worth">
+            <div class="kpi-header">
+              <span>Overall Net Worth</span>
+              <div class="kpi-icon-wrapper">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="kpi-val-net-worth">$0.00</div>
+            <div class="kpi-footer">
+              <span>Investments + Cash + Lent - Owed</span>
+            </div>
+          </div>
+
+          <div class="card kpi-card kpi-cash">
+            <div class="kpi-header">
+              <span>Available Cash Balance</span>
+              <div class="kpi-icon-wrapper">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="kpi-val-cash">$0.00</div>
+            <div class="kpi-footer">
+              <span>Liquid assets ready to deploy</span>
+            </div>
+          </div>
+
+          <div class="card kpi-card kpi-investments">
+            <div class="kpi-header">
+              <span>Total Investments</span>
+              <div class="kpi-icon-wrapper">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="kpi-val-investments">$0.00</div>
+            <div class="kpi-footer">
+              <span id="kpi-val-investments-growth">Growth: $0.00 (0%)</span>
+            </div>
+          </div>
+
+          <div class="card kpi-card kpi-loans-given">
+            <div class="kpi-header">
+              <span>Loans Given (Receivables)</span>
+              <div class="kpi-icon-wrapper">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 11l3-3m0 0l3 3m-3-3v8m0-13a9 9 0 110 18 9 9 0 010-18z"></path></svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="kpi-val-loans-given">$0.00</div>
+            <div class="kpi-footer">
+              <span>Outstanding capital lent to others</span>
+            </div>
+          </div>
+
+          <div class="card kpi-card kpi-loans-taken">
+            <div class="kpi-header">
+              <span>Loans Taken (Liabilities)</span>
+              <div class="kpi-icon-wrapper">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13l-3 3m0 0l-3-3m3 3V8m0-3a9 9 0 110 18 9 9 0 010-18z"></path></svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="kpi-val-loans-taken">$0.00</div>
+            <div class="kpi-footer">
+              <span>Active capital owed to lenders</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard Charts Matrix -->
+        <div class="dashboard-grid-charts">
+          <div class="card chart-card">
+            <div class="card-title-bar">
+              <h3 class="card-title">Net Worth Growth Trend</h3>
+              <span class="text-muted" style="font-size: 0.8rem;">Last 5 Months</span>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="chart-net-worth-trend"></canvas>
+            </div>
+          </div>
+
+          <div class="card chart-card">
+            <div class="card-title-bar">
+              <h3 class="card-title">Expenses by Category</h3>
+            </div>
+            <div class="chart-canvas-container" style="max-height: 220px;">
+              <canvas id="chart-expense-breakdown"></canvas>
+            </div>
+            <div class="distribution-list" id="dashboard-expense-legend">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid-charts">
+          <div class="card chart-card" style="min-height: auto;">
+            <div class="card-title-bar">
+              <h3 class="card-title">Investment Portfolio Allocation</h3>
+            </div>
+            <div class="chart-canvas-container" style="max-height: 220px;">
+              <canvas id="chart-investment-distribution"></canvas>
+            </div>
+            <div class="distribution-list" id="dashboard-investment-legend">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- RELATIONAL RECENT ACTIVITY LOGGER -->
+          <div class="card chart-card" style="min-height: auto;">
+            <div class="card-title-bar">
+              <h3 class="card-title">Relational Audit Trail</h3>
+              <a href="#/settings" class="text-muted" style="font-size: 0.8rem; text-decoration: underline;">View All Logs</a>
+            </div>
+            <div class="audit-list" id="dashboard-audit-feed">
+              <!-- Rendered dynamically from relational audit logs -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- =========================================================================
+           2. VIEW: INCOME MANAGEMENT
+           ========================================================================= -->
+      <div id="income-view" class="view-container">
+        <div class="grid-3col">
+          <!-- Form Card -->
+          <div class="card" style="grid-column: span 1;">
+            <div class="card-title-bar">
+              <h3 class="card-title">Log New Income</h3>
+            </div>
+            <form id="income-form">
+              <div class="form-group mb-3">
+                <label for="inc-date">Date</label>
+                <input type="date" id="inc-date" required>
+              </div>
+              <div class="form-group mb-3">
+                <label for="inc-source">Income Source</label>
+                <select id="inc-source" required>
+                  <option value="" disabled selected>Select Source</option>
+                  <option value="Salary">Salary</option>
+                  <option value="Freelancing">Freelancing</option>
+                  <option value="Business">Business</option>
+                  <option value="Interest">Interest</option>
+                  <option value="Other Income">Other Income</option>
+                </select>
+              </div>
+              <div class="form-group mb-3">
+                <label for="inc-amount">Amount ($)</label>
+                <input type="number" id="inc-amount" placeholder="0.00" min="0.01" step="0.01" required>
+              </div>
+              <div class="form-group mb-3">
+                <label for="inc-destination" style="color: hsl(var(--primary-base)); font-weight:700;">Deposit Destination</label>
+                <select id="inc-destination" required style="border-color: hsl(var(--primary-base)); font-weight:600;">
+                  <option value="Cash Balance" selected>Cash Balance (Liquid)</option>
+                  <option value="Fixed Deposit (FD)">Fixed Deposit (FD)</option>
+                  <option value="Stocks">Stocks</option>
+                  <option value="Mutual Funds">Mutual Funds</option>
+                  <option value="Gold">Gold</option>
+                  <option value="Gullak (Piggy Bank)">Gullak (Piggy Bank)</option>
+                  <option value="Emergency Fund">Emergency Fund</option>
+                  <option value="Other Investments">Other Investments</option>
+                </select>
+              </div>
+              <div class="form-group mb-4">
+                <label for="inc-desc">Description</label>
+                <textarea id="inc-desc" rows="2" placeholder="e.g. Monthly salary credit"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:16px; height:16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                Record Income Inflow
+              </button>
+            </form>
+          </div>
+
+          <!-- History Grid -->
+          <div class="card" style="grid-column: span 2;">
+            <div class="card-title-bar">
+              <h3 class="card-title">Income Transaction Logs</h3>
+              <div class="form-group" style="flex-direction: row; gap: 0.5rem; align-items: center;">
+                <input type="text" id="inc-search" placeholder="Search Incomes..." style="padding: 0.45rem 0.75rem; font-size: 0.8rem; border-radius: var(--border-radius-sm);">
+              </div>
+            </div>
+            <div class="table-responsive-wrapper">
+              <table class="data-table" id="income-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Source</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th style="width: 60px;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="income-rows-target">
+                  <!-- JS Injection -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- =========================================================================
+           3. VIEW: EXPENSE MANAGEMENT
+           ========================================================================= -->
+      <div id="expenses-view" class="view-container">
+        <div class="grid-3col">
+          <!-- Form Card -->
+          <div class="card" style="grid-column: span 1;">
+            <div class="card-title-bar">
+              <h3 class="card-title">Log New Expense</h3>
+            </div>
+            <form id="expense-form">
+              <div class="form-group mb-3">
+                <label for="exp-date">Date</label>
+                <input type="date" id="exp-date" required>
+              </div>
+              <div class="form-group mb-3">
+                <label for="exp-category">Expense Category</label>
+                <select id="exp-category" required>
+                  <option value="" disabled selected>Select Category</option>
+                  <option value="Personal Expenses">Personal Expenses</option>
+                  <option value="Grocery">Grocery</option>
+                  <option value="Family Support">Family Support</option>
+                  <option value="Bills">Bills</option>
+                  <option value="Health">Health</option>
+                  <option value="Investment">Investment</option>
+                  <option value="Other Expenses">Other Expenses</option>
+                </select>
+              </div>
+              <div class="form-group mb-3">
+                <label for="exp-amount">Amount ($)</label>
+                <input type="number" id="exp-amount" placeholder="0.00" min="0.01" step="0.01" required>
+              </div>
+              <div class="form-group mb-4">
+                <label for="exp-desc">Description</label>
+                <textarea id="exp-desc" rows="2" placeholder="e.g. Grocery basket at supermarket"></textarea>
+              </div>
+              <button type="submit" class="btn btn-danger" style="width: 100%; border:none; background: linear-gradient(135deg, hsl(var(--crimson-base)) 0%, hsl(var(--hue-crimson), 80%, 45%) 100%); color:white; box-shadow:0 4px 14px hsla(var(--crimson-base), 0.25);">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:16px; height:16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Record Cash Outflow
+              </button>
+            </form>
+          </div>
+
+          <!-- History Grid -->
+          <div class="card" style="grid-column: span 2;">
+            <div class="card-title-bar">
+              <h3 class="card-title">Expense Transaction Logs</h3>
+              <div class="form-group" style="flex-direction: row; gap: 0.5rem; align-items: center;">
+                <input type="text" id="exp-search" placeholder="Search Expenses..." style="padding: 0.45rem 0.75rem; font-size: 0.8rem; border-radius: var(--border-radius-sm);">
+              </div>
+            </div>
+            <div class="table-responsive-wrapper">
+              <table class="data-table" id="expense-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th style="width: 120px;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="expense-rows-target">
+                  <!-- JS Injection -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- =========================================================================
+           4. VIEW: INVESTMENTS & SAVINGS MANAGEMENT
+           ========================================================================= -->
+      <div id="investments-view" class="view-container">
+        <!-- Top Stats row -->
+        <div class="dashboard-grid-kpi" style="margin-bottom: 2rem;">
+          <div class="card kpi-card" style="--kpi-accent: hsl(var(--primary-base));">
+            <div class="kpi-header"><span>Total Invested Principal</span></div>
+            <div class="kpi-value" id="inv-val-total-principal">$0.00</div>
+            <div class="kpi-footer"><span>Historical cash deployed</span></div>
+          </div>
+          <div class="card kpi-card" style="--kpi-accent: hsl(var(--emerald-base));">
+            <div class="kpi-header"><span>Current Portfolio Value</span></div>
+            <div class="kpi-value" id="inv-val-total-current">$0.00</div>
+            <div class="kpi-footer"><span>Market re-evaluated sum</span></div>
+          </div>
+          <div class="card kpi-card" style="--kpi-accent: hsl(var(--amber-base));">
+            <div class="kpi-header"><span>Net Wealth Growth</span></div>
+            <div class="kpi-value" id="inv-val-total-growth">$0.00</div>
+            <div class="kpi-footer"><span id="inv-val-total-growth-pct">0% aggregate returns</span></div>
+          </div>
+        </div>
+
+        <div class="grid-2col mb-4">
+          <!-- Investment Assets Table list -->
+          <div class="card">
+            <div class="card-title-bar">
+              <h3 class="card-title">Portfolio Allocation Map</h3>
+              <div class="card-header-actions">
+                <button class="btn btn-primary btn-sm" id="btn-open-transfer-modal" style="padding: 0.45rem 0.9rem; font-size: 0.8rem;">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:14px; height:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                  Transfer Funds
+                </button>
+              </div>
+            </div>
+            <div class="table-responsive-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Asset Class</th>
+                    <th>Offering (Interest %)</th>
+                    <th>Invested Cost ($)</th>
+                    <th>Current Value ($)</th>
+                    <th>Est. Annual Return</th>
+                    <th>Total Yield (Gain)</th>
+                    <th style="width: 80px; text-align: right;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="investment-rows-target">
+                  <!-- JS Injection -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Investment Transactions Ledger -->
+          <div class="card">
+            <div class="card-title-bar">
+              <h3 class="card-title">Asset Transaction History</h3>
+            </div>
+            <div class="table-responsive-wrapper" style="max-height: 400px;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Txn Type</th>
+                    <th>Source/Flow</th>
+                    <th>Amount</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody id="investment-txn-rows-target">
+                  <!-- JS Injection -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- =========================================================================
+           5. VIEW: LOANS & DEBTS (LIABILITIES & RECEIVABLES)
+           ========================================================================= -->
+      <div id="loans-view" class="view-container">
+        <!-- 5.1 LOANS TAKEN (LIABILITIES) -->
+        <div class="card mb-4">
+          <div class="card-title-bar">
+            <h3 class="card-title">Loans Taken (Liabilities)</h3>
+            <button class="btn btn-danger" id="btn-open-loan-taken-modal" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:16px; height:16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              Record Borrowed Loan
+            </button>
+          </div>
+          <div class="table-responsive-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Lender</th>
+                  <th>Amount Borrowed</th>
+                  <th>Date Taken</th>
+                  <th>Interest Rate (%)</th>
+                  <th>Outstanding Balance</th>
+                  <th>Status</th>
+                  <th>Notes</th>
+                  <th style="width: 200px; text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="loans-taken-rows-target">
+                <!-- JS Injection -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 5.2 LOANS GIVEN (RECEIVABLES) -->
+        <div class="card">
+          <div class="card-title-bar">
+            <h3 class="card-title">Loans Given (Receivables)</h3>
+            <button class="btn btn-warning" id="btn-open-loan-given-modal" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:16px; height:16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              Record Lent Loan
+            </button>
+          </div>
+          <div class="table-responsive-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Borrower</th>
+                  <th>Amount Lent</th>
+                  <th>Date Given</th>
+                  <th>Outstanding Balance</th>
+                  <th>Purpose</th>
+                  <th>Status</th>
+                  <th style="width: 200px; text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="loans-given-rows-target">
+                <!-- JS Injection -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- =========================================================================
+           6. VIEW: REPORTS
+           ========================================================================= -->
+      <div id="reports-view" class="view-container">
+        <!-- Analytical Cards Grid -->
+        <div class="dashboard-grid-charts mb-4">
+          <div class="card chart-card">
+            <div class="card-title-bar">
+              <h3 class="card-title">Monthly Income vs Expense Growth</h3>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="chart-reports-income-expense"></canvas>
+            </div>
+          </div>
+
+          <div class="card chart-card">
+            <div class="card-title-bar">
+              <h3 class="card-title">Dynamic Net Worth Projection</h3>
+            </div>
+            <div class="chart-canvas-container">
+              <canvas id="chart-reports-networth-trend"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2col">
+          <!-- Active Loans and Receivables ledger -->
+          <div class="card">
+            <div class="card-title-bar">
+              <h3 class="card-title">Active Borrowings & Receivables</h3>
+            </div>
+            <div class="grid-2col mb-2">
+              <div>
+                <h4 style="font-size: 0.95rem; margin-bottom: 0.75rem;" class="text-danger">Active Owed (Liabilities):</h4>
+                <div class="audit-list" id="report-loans-taken-list" style="max-height: 200px;">
+                  <!-- Rendered via JS -->
+                </div>
+              </div>
+              <div>
+                <h4 style="font-size: 0.95rem; margin-bottom: 0.75rem;" class="text-warning">Active Lent (Receivables):</h4>
+                <div class="audit-list" id="report-loans-given-list" style="max-height: 200px;">
+                  <!-- Rendered via JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Investment Yields and manual revaluations -->
+          <div class="card">
+            <div class="card-title-bar">
+              <h3 class="card-title">Asset Class Yield Breakdown</h3>
+            </div>
+            <div class="table-responsive-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Asset Class</th>
+                    <th>Total Capital</th>
+                    <th>Current Valuation</th>
+                    <th>Absolute Growth</th>
+                    <th>Yield (%)</th>
+                  </tr>
+                </thead>
+                <tbody id="report-yield-rows-target">
+                  <!-- Rendered via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- =========================================================================
+           7. VIEW: SETTINGS
+           ========================================================================= -->
+      <div id="settings-view" class="view-container">
+        <div class="grid-2col mb-4">
+          <!-- General Configurations -->
+          <div class="card">
+            <div class="card-title-bar">
+              <h3 class="card-title">Account Profile Configurations</h3>
+            </div>
+            <div class="form-group mb-3">
+              <label for="settings-username-display">Username Profile</label>
+              <input type="text" id="settings-username-display" readonly style="opacity: 0.7;">
+            </div>
+            <form id="settings-cash-form">
+              <div class="form-group mb-4">
+                <label for="settings-opening-balance">Opening Cash Balance ($)</label>
+                <input type="number" id="settings-opening-balance" step="0.01" required>
+              </div>
+              <button type="submit" class="btn btn-primary">Update Cash Profile</button>
+            </form>
+          </div>
+
+          <!-- Relational database imports & backup -->
+          <div class="card">
+            <div class="card-title-bar">
+              <h3 class="card-title">Financial Database Utilities</h3>
+            </div>
+            <p class="text-muted mb-3" style="font-size: 0.85rem; line-height: 1.4;">
+              Export all system records (Incomes, Expenses, Investment logs, Loans, and Audit Trail history) as a single portable `.json` file for backups, or load a previous backup.
+            </p>
+            <div class="form-group mb-4" style="flex-direction: row; gap: 1rem; flex-wrap: wrap;">
+              <button class="btn btn-success" id="btn-export-database">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:16px; height:16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Download JSON Backup
+              </button>
+              <label class="btn btn-secondary" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:16px; height:16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                Upload JSON Backup
+                <input type="file" id="settings-import-file" accept=".json" style="display: none;">
+              </label>
+            </div>
+            <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+            <h4 class="text-danger mb-2" style="font-size: 1rem;">System Reset Area</h4>
+            <p class="text-muted mb-3" style="font-size: 0.8rem;">Caution: This wipes all financial transactions, investments, loans, and audit tables. It is permanent!</p>
+            <button class="btn btn-danger" id="btn-wipe-database">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:16px; height:16px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              Factory Reset Database
+            </button>
+          </div>
+        </div>
+
+        <!-- AuraFinance Real-Time Cloud Sync -->
+        <div class="card mb-4">
+          <div class="card-title-bar">
+            <h3 class="card-title" style="color: hsl(var(--primary-base));">AuraFinance Real-Time Cloud Sync</h3>
+            <span class="badge" id="sync-status-badge" style="background: hsl(0, 80%, 45%); color: white; padding: 0.25rem 0.5rem; font-size: 0.75rem; border-radius: var(--border-radius-sm);">Offline / Not Syncing</span>
+          </div>
+          <p class="text-muted mb-3" style="font-size: 0.85rem; line-height: 1.4;">
+            Sync your financial database across your PC and mobile devices dynamically. Enter a unique, secret <strong>Sync Key</strong> (e.g. a passcode or custom secret phrase). The app will automatically push changes to the cloud and pull them down on page load!
+          </p>
+          <div class="grid-2col" style="gap: 1rem; align-items: flex-end;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="settings-sync-key">Your Secret Sync Key</label>
+              <input type="text" id="settings-sync-key" placeholder="Enter a unique sync key (e.g. archana_secret_123)" style="font-family: monospace; font-weight: 600; padding: 0.5rem 0.75rem; border-radius: var(--border-radius-sm);">
+            </div>
+            <div class="form-group" style="flex-direction: row; gap: 0.5rem; flex-wrap: wrap; margin-bottom:0;">
+              <button class="btn btn-primary" id="btn-enable-sync" style="background: hsl(var(--primary-base)); border: none; padding: 0.55rem 1rem;">
+                Enable Cloud Sync
+              </button>
+              <button class="btn btn-success" id="btn-force-push" style="display: none; padding: 0.55rem 1rem; border: none; background: hsl(var(--emerald-base));">
+                Force Push
+              </button>
+              <button class="btn btn-secondary" id="btn-force-pull" style="display: none; padding: 0.55rem 1rem;">
+                Force Pull
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-title-bar">
+            <h3 class="card-title">Comprehensive System Audit Ledger</h3>
+          </div>
+          <div class="audit-list" id="settings-audit-feed-complete" style="max-height: 400px;">
+            <!-- Complete Audit feed rendered via JS -->
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- =========================================================================
+       C. SYSTEM INTERACTIVE MODALS PORTALS
+       ========================================================================= -->
+  
+  <!-- MODAL: ADD LOAN TAKEN (LIABILITY) -->
+  <div class="modal-overlay" id="modal-loan-taken">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Record Borrowed Capital</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-loan-taken')">✕</button>
+      </div>
+      <form id="modal-loan-taken-form">
+        <div class="modal-body">
+          <div class="form-group mb-3">
+            <label for="taken-lender">Lender Name</label>
+            <input type="text" id="taken-lender" placeholder="e.g. Citibank, Friend's Name" required>
+          </div>
+          <div class="form-group mb-3">
+            <label for="taken-amount">Loan Principal Amount ($)</label>
+            <input type="number" id="taken-amount" placeholder="0.00" min="0.01" step="0.01" required>
+          </div>
+          <div class="form-group mb-3">
+            <label for="taken-date">Date Borrowed</label>
+            <input type="date" id="taken-date" required>
+          </div>
+          <div class="form-group mb-3">
+            <label for="taken-rate">Interest Rate (% Annual, Optional)</label>
+            <input type="number" id="taken-rate" placeholder="0.0" min="0" step="0.1" value="0">
+          </div>
+          <div class="form-group mb-1">
+            <label for="taken-notes">Lender Notes</label>
+            <textarea id="taken-notes" rows="2" placeholder="e.g. Car loan term 3 years"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-loan-taken')">Cancel</button>
+          <button type="submit" class="btn btn-danger" style="background: hsl(var(--crimson-base)); border: none;">Save Liability Inflow</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD LOAN GIVEN (RECEIVABLE) -->
+  <div class="modal-overlay" id="modal-loan-given">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Record Lent Capital</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-loan-given')">✕</button>
+      </div>
+      <form id="modal-loan-given-form">
+        <div class="modal-body">
+          <div class="form-group mb-3">
+            <label for="given-borrower">Borrower Name</label>
+            <input type="text" id="given-borrower" placeholder="e.g. Ryan Reynolds" required>
+          </div>
+          <div class="form-group mb-3">
+            <label for="given-amount">Lent Principal Amount ($)</label>
+            <input type="number" id="given-amount" placeholder="0.00" min="0.01" step="0.01" required>
+          </div>
+          <div class="form-group mb-3">
+            <label for="given-date">Date Lent</label>
+            <input type="date" id="given-date" required>
+          </div>
+          <div class="form-group mb-1">
+            <label for="given-purpose">Lending Purpose</label>
+            <textarea id="given-purpose" rows="2" placeholder="e.g. Emergency medical expenses support" required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-loan-given')">Cancel</button>
+          <button type="submit" class="btn btn-warning" style="background: hsl(var(--amber-base)); border: none;">Save Receivable Outflow</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REPAY LOAN TAKEN (LIABILITY REPAYMENT) -->
+  <div class="modal-overlay" id="modal-repay-taken">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Record Loan Taken Repayment</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-repay-taken')">✕</button>
+      </div>
+      <form id="modal-repay-taken-form">
+        <input type="hidden" id="repay-taken-loan-id">
+        <div class="modal-body">
+          <div class="form-group mb-3">
+            <label>Lender</label>
+            <input type="text" id="repay-taken-lender-name" readonly style="opacity:0.75;">
+          </div>
+          <div class="form-group mb-3">
+            <label for="repay-taken-amount">Repayment Amount ($)</label>
+            <input type="number" id="repay-taken-amount" placeholder="0.00" min="0.01" step="0.01" required>
+            <small class="text-muted" id="repay-taken-max-helper" style="font-size: 0.75rem; margin-top: 0.25rem;"></small>
+          </div>
+          <div class="form-group mb-3">
+            <label for="repay-taken-date">Date Paid</label>
+            <input type="date" id="repay-taken-date" required>
+          </div>
+          <div class="form-group mb-1">
+            <label for="repay-taken-notes">Payment Notes</label>
+            <textarea id="repay-taken-notes" rows="2" placeholder="e.g. Regular monthly EMI installment"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-repay-taken')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Process Cash Repayment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REPAY LOAN GIVEN (RECEIVABLE REPAYMENT WITH ALLOCATION ROUTE) -->
+  <div class="modal-overlay" id="modal-repay-given">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Record Returned Loan Capital</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-repay-given')">✕</button>
+      </div>
+      <form id="modal-repay-given-form">
+        <input type="hidden" id="repay-given-loan-id">
+        <div class="modal-body">
+          <div class="form-group mb-3">
+            <label>Borrower</label>
+            <input type="text" id="repay-given-borrower-name" readonly style="opacity:0.75;">
+          </div>
+          <div class="form-group mb-3">
+            <label for="repay-given-amount">Returned Amount ($)</label>
+            <input type="number" id="repay-given-amount" placeholder="0.00" min="0.01" step="0.01" required>
+            <small class="text-muted" id="repay-given-max-helper" style="font-size: 0.75rem; margin-top: 0.25rem;"></small>
+          </div>
+          <div class="form-group mb-3">
+            <label for="repay-given-date">Date Received</label>
+            <input type="date" id="repay-given-date" required>
+          </div>
+          
+          <!-- PORTABLE RELATIONAL ASSET ALLOCATION SELECTOR -->
+          <div class="form-group mb-3">
+            <label for="repay-given-allocation" style="color: hsl(var(--primary-base)); font-weight: 700;">
+              Fund Allocation Route (Relational Audit Trail)
+            </label>
+            <select id="repay-given-allocation" required style="border-color: hsl(var(--primary-base)); font-weight: 600;">
+              <option value="" disabled selected>Route returned capital to...</option>
+              <option value="Cash Balance">Cash Balance (Liquid)</option>
+              <option value="Fixed Deposit (FD)">Fixed Deposit (FD) (Investment)</option>
+              <option value="Stocks">Stocks (Investment)</option>
+              <option value="Mutual Funds">Mutual Funds (Investment)</option>
+              <option value="Gold">Gold (Investment)</option>
+              <option value="Gullak (Piggy Bank)">Gullak (Piggy Bank) (Investment)</option>
+              <option value="Emergency Fund">Emergency Fund (Investment)</option>
+              <option value="Other Investments">Other Investments (Investment)</option>
+            </select>
+            <small class="text-muted" style="font-size: 0.75rem; margin-top: 0.25rem; display: block; line-height: 1.3;">
+              relational triggers automatically deposit returned funds directly into the chosen asset and log the audit trail.
+            </small>
+          </div>
+
+          <div class="form-group mb-1">
+            <label for="repay-given-notes">Collection Notes</label>
+            <textarea id="repay-given-notes" rows="2" placeholder="e.g. Received partial return check"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-repay-given')">Cancel</button>
+          <button type="submit" class="btn btn-success">Record Allocation Inflow</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ASSET TRANSFER MODAL -->
+  <div class="modal-overlay" id="modal-transfer-assets">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Transfer Wealth Funds</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-transfer-assets')">✕</button>
+      </div>
+      <form id="modal-transfer-assets-form">
+        <div class="modal-body">
+          <div class="form-group mb-3">
+            <label for="transfer-from">Source Wallet/Asset</label>
+            <select id="transfer-from" required>
+              <option value="" disabled selected>Choose Source</option>
+              <option value="Cash Balance">Cash Balance (Liquid)</option>
+              <option value="Fixed Deposit (FD)">Fixed Deposit (FD)</option>
+              <option value="Stocks">Stocks</option>
+              <option value="Mutual Funds">Mutual Funds</option>
+              <option value="Gold">Gold</option>
+              <option value="Gullak (Piggy Bank)">Gullak (Piggy Bank)</option>
+              <option value="Emergency Fund">Emergency Fund</option>
+              <option value="Other Investments">Other Investments</option>
+            </select>
+          </div>
+          <div class="form-group mb-3">
+            <label for="transfer-to">Destination Asset</label>
+            <select id="transfer-to" required>
+              <option value="" disabled selected>Choose Destination</option>
+              <option value="Cash Balance">Cash Balance (Liquid)</option>
+              <option value="Fixed Deposit (FD)">Fixed Deposit (FD)</option>
+              <option value="Stocks">Stocks</option>
+              <option value="Mutual Funds">Mutual Funds</option>
+              <option value="Gold">Gold</option>
+              <option value="Gullak (Piggy Bank)">Gullak (Piggy Bank)</option>
+              <option value="Emergency Fund">Emergency Fund</option>
+              <option value="Other Investments">Other Investments</option>
+            </select>
+          </div>
+          <div class="form-group mb-3">
+            <label for="transfer-amount">Transfer Amount ($)</label>
+            <input type="number" id="transfer-amount" placeholder="0.00" min="0.01" step="0.01" required>
+          </div>
+          <div class="form-group mb-3">
+            <label for="transfer-date">Transfer Date</label>
+            <input type="date" id="transfer-date" required>
+          </div>
+          <div class="form-group mb-1">
+            <label for="transfer-notes">Transfer Memo</label>
+            <textarea id="transfer-notes" rows="2" placeholder="e.g. Moving bank savings into Index fund"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-transfer-assets')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Process Transfer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: MANAGE INVESTMENT DETAILS -->
+  <div class="modal-overlay" id="modal-revalue-investment">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Manage Investment Details</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-revalue-investment')">✕</button>
+      </div>
+      <form id="modal-revalue-investment-form">
+        <input type="hidden" id="revalue-type">
+        <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+          <div class="form-group mb-3">
+            <label>Asset Class</label>
+            <input type="text" id="revalue-type-display" readonly style="opacity: 0.75;">
+          </div>
+          
+          <!-- Editable Invested Cost Basis (for already invested past amounts) -->
+          <div class="form-group mb-3">
+            <label for="revalue-invested-cost">Invested Cost Basis / Principal ($)</label>
+            <input type="number" id="revalue-invested-cost" placeholder="0.00" min="0" step="0.01" required>
+            <small class="text-muted" style="font-size: 0.75rem; margin-top: 0.25rem; display: block;">
+              Set the total capital invested in this asset. Edit this to put existing past investments!
+            </small>
+          </div>
+
+          <div class="form-group mb-3">
+            <label for="revalue-funding-source" style="color: hsl(var(--primary-base)); font-weight:700;">Funding Source (For Cost Adjustments)</label>
+            <select id="revalue-funding-source" required style="border-color: hsl(var(--primary-base)); font-weight:600;">
+              <option value="Existing Portfolio" selected>Existing Portfolio (Past assets - no Cash decrease)</option>
+              <option value="Cash Balance">Cash Balance (Deducts from current liquid cash)</option>
+            </select>
+            <small class="text-muted" id="revalue-cash-helper" style="font-size: 0.75rem; margin-top: 0.25rem; display: block;"></small>
+            <small class="text-muted" style="font-size: 0.75rem; margin-top: 0.25rem; display: block;">
+              Choose 'Existing Portfolio' if you already had this investment in the past (keeps current cash intact).
+            </small>
+          </div>
+
+          <div class="form-group mb-3">
+            <label for="revalue-interest-rate">Expected Annual Interest/Yield Rate (% p.a.)</label>
+            <input type="number" id="revalue-interest-rate" placeholder="e.g. 7.1" min="0" max="100" step="0.01" required>
+            <small class="text-muted" style="font-size: 0.75rem; margin-top: 0.25rem; display: block;">
+              Enter the annual interest rate (e.g. 7.1% for FD) or expected annual yield.
+            </small>
+          </div>
+
+          <!-- FD Special Fields (Shown dynamically for Fixed Deposit (FD) via JS) -->
+          <div id="revalue-fd-fields" style="display: none; border-left: 3px solid hsl(var(--primary-base)); padding-left: 1rem; margin-bottom: 1.5rem;">
+            <h4 style="font-size: 0.9rem; margin-bottom: 0.75rem; color: hsl(var(--primary-base));">Fixed Deposit (FD) Maturity Calculator</h4>
+            <div class="form-group mb-3">
+              <label for="revalue-tenure">Tenure (in Days)</label>
+              <input type="number" id="revalue-tenure" placeholder="e.g. 365" min="1" step="1">
+            </div>
+            <div class="form-group mb-3">
+              <label for="revalue-deposit-date">Deposit Start Date</label>
+              <input type="date" id="revalue-deposit-date">
+            </div>
+            <div style="background: var(--bg-card-hover); padding: 0.75rem; border-radius: var(--border-radius-sm); font-size: 0.8rem; display: flex; flex-direction: column; gap: 0.35rem;">
+              <div>Estimated Maturity Interest: <strong id="revalue-calc-interest" class="text-success">$0.00</strong></div>
+              <div>Estimated Maturity Value: <strong id="revalue-calc-maturity" class="text-success">$0.00</strong></div>
+              <div>Maturity Date: <strong id="revalue-calc-date" class="text-muted">—</strong></div>
+            </div>
+          </div>
+
+          <div class="form-group mb-3">
+            <label for="revalue-new-val">Current Value ($)</label>
+            <input type="number" id="revalue-new-val" placeholder="0.00" min="0" step="0.01" required>
+            <small class="text-muted" style="font-size: 0.75rem; margin-top: 0.25rem; display: block;">
+              Adjust current valuation to calculate dynamic return yields. (FDs can auto-calculate maturity value).
+            </small>
+          </div>
+          
+          <div class="form-group mb-1">
+            <label for="revalue-notes">Adjustment Notes</label>
+            <textarea id="revalue-notes" rows="2" placeholder="e.g. Setting FD rate & re-evaluation"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-revalue-investment')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Details</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: DEDICATED FD ACCOUNTS LIST & CONTRACTS MANAGER -->
+  <div class="modal-overlay" id="modal-manage-fds">
+    <div class="modal-container" style="max-width: 820px; width: 95%;">
+      <div class="modal-header">
+        <h3>Fixed Deposits Ledger Manager</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-manage-fds')">✕</button>
+      </div>
+      <div class="modal-body" style="max-height: 75vh; overflow-y: auto; display: flex; flex-direction: column; gap: 2rem;">
+        
+        <!-- Part 1: Table List of Active FDs -->
+        <div>
+          <h4 style="font-size: 1rem; margin-bottom: 0.75rem; color: hsl(var(--primary-base));">Active Fixed Deposit Accounts</h4>
+          <div class="table-responsive-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Bank / Account</th>
+                  <th>Principal ($)</th>
+                  <th>Interest Rate</th>
+                  <th>Tenure</th>
+                  <th>Deposit Date</th>
+                  <th>Current Value ($)</th>
+                  <th>Interest Earned ($)</th>
+                  <th style="width: 220px; text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="fd-ledger-rows-target">
+                <!-- Rendered dynamically via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <hr style="border:0; border-top: 1px solid var(--border-color);">
+
+        <!-- Part 2: Form to Add New FD Account Contract -->
+        <div>
+          <h4 style="font-size: 1rem; margin-bottom: 1rem; color: hsl(var(--emerald-base));">Open New Fixed Deposit Contract</h4>
+          <form id="modal-add-fd-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="fd-new-name">Bank / Account Name</label>
+                <input type="text" id="fd-new-name" placeholder="e.g. Chase Bank FD 3" required>
+              </div>
+              <div class="form-group">
+                <label for="fd-new-principal">Principal Amount ($)</label>
+                <input type="number" id="fd-new-principal" placeholder="0.00" min="0.01" step="0.01" required>
+              </div>
+              <div class="form-group">
+                <label for="fd-new-rate">Interest Rate (% p.a.)</label>
+                <input type="number" id="fd-new-rate" placeholder="e.g. 7.1" min="0.01" max="100" step="0.01" required>
+              </div>
+            </div>
+            
+            <div class="form-grid mt-3" style="margin-top: 1rem;">
+              <div class="form-group">
+                <label for="fd-new-tenure">Tenure (Days)</label>
+                <input type="number" id="fd-new-tenure" placeholder="e.g. 365" min="1" step="1" required>
+              </div>
+              <div class="form-group">
+                <label for="fd-new-date">Deposit Start Date</label>
+                <input type="date" id="fd-new-date" required>
+              </div>
+              <div class="form-group">
+                <label for="fd-new-source" style="color: hsl(var(--primary-base)); font-weight:700;">Funding Source</label>
+                <select id="fd-new-source" required style="border-color: hsl(var(--primary-base)); font-weight:600;">
+                  <option value="Existing Portfolio" selected>Existing Portfolio (Past assets - no Cash decrease)</option>
+                  <option value="Cash Balance">Cash Balance (Deducts from current liquid cash)</option>
+                </select>
+                <small class="text-muted" id="fd-cash-helper" style="font-size: 0.75rem; margin-top: 0.25rem; display: block;"></small>
+              </div>
+            </div>
+
+            <!-- Interactive real-time calculator inside Open New FD form -->
+            <div style="margin-top: 1rem; background: var(--bg-card-hover); padding: 0.75rem; border-radius: var(--border-radius-sm); font-size: 0.8rem; display: flex; gap: 1.5rem; flex-wrap: wrap;">
+              <div>Estimated Maturity Interest: <strong id="fd-calc-interest" class="text-success">$0.00</strong></div>
+              <div>Estimated Maturity Value: <strong id="fd-calc-maturity" class="text-success">$0.00</strong></div>
+              <div>Maturity Date: <strong id="fd-calc-date" class="text-muted">—</strong></div>
+            </div>
+
+            <div class="d-flex-between" style="margin-top: 1.5rem; justify-content: flex-end; gap: 0.75rem;">
+              <button type="submit" class="btn btn-success">Open FD Contract</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-manage-fds')">Close Ledger</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: LIQUIDATE FIXED DEPOSIT ACCOUNT -->
+  <div class="modal-overlay" id="modal-liquidate-fd">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Liquidate/Mature FD Account</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-liquidate-fd')">✕</button>
+      </div>
+      <form id="modal-liquidate-fd-form">
+        <input type="hidden" id="liquidate-fd-id">
+        <div class="modal-body">
+          <div class="form-group mb-3">
+            <label>FD Account Reference</label>
+            <input type="text" id="liquidate-fd-name-display" readonly style="opacity: 0.75;">
+          </div>
+          <div class="form-group mb-3">
+            <label>Calculated Maturity Value ($)</label>
+            <input type="text" id="liquidate-fd-value-display" readonly style="opacity: 0.75; font-weight:700;">
+          </div>
+          <div class="form-group mb-4">
+            <label for="liquidate-fd-allocation" style="color: hsl(var(--primary-base)); font-weight:700;">Route Returned Capital To...</label>
+            <select id="liquidate-fd-allocation" required style="border-color: hsl(var(--primary-base)); font-weight:600;">
+              <option value="Cash Balance" selected>Cash Balance (Liquid)</option>
+              <option value="Other Investments">Other Investments</option>
+            </select>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
+            Closing this FD will mark its status as Closed and trigger a transfer of the maturity value into your chosen account.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-liquidate-fd')">Cancel</button>
+          <button type="submit" class="btn btn-danger" style="background: hsl(var(--crimson-base)); border:none;">Process Liquidation</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: DEDICATED STOCKS & MUTUAL FUNDS MANAGER (DYNAMIC) -->
+  <div class="modal-overlay" id="modal-manage-assets">
+    <div class="modal-container" style="max-width: 820px; width: 95%;">
+      <div class="modal-header">
+        <h3 id="asset-ledger-title">Asset Ledger Manager</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-manage-assets')">✕</button>
+      </div>
+      <div class="modal-body" style="max-height: 75vh; overflow-y: auto; display: flex; flex-direction: column; gap: 2rem;">
+        
+        <!-- Part 1: Table List of Active Holdings -->
+        <div>
+          <h4 id="asset-ledger-active-title" style="font-size: 1rem; margin-bottom: 0.75rem; color: hsl(var(--primary-base));">Active Holdings</h4>
+          <div class="table-responsive-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Holding Name</th>
+                  <th>Invested Cost ($)</th>
+                  <th>Current Value ($)</th>
+                  <th>Expected Return</th>
+                  <th>Purchase Date</th>
+                  <th>Yield (Gain)</th>
+                  <th style="width: 220px; text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="asset-ledger-rows-target">
+                <!-- Rendered dynamically via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <hr style="border:0; border-top: 1px solid var(--border-color);">
+
+        <!-- Part 2: Form to Add New Asset Holding -->
+        <div>
+          <h4 id="asset-new-title" style="font-size: 1rem; margin-bottom: 1rem; color: hsl(var(--emerald-base));">Record New Holding</h4>
+          <form id="modal-add-asset-form">
+            <input type="hidden" id="asset-ledger-type">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="asset-new-name">Asset Name / Ticker</label>
+                <input type="text" id="asset-new-name" placeholder="e.g. Apple Inc. (AAPL)" required>
+              </div>
+              <div class="form-group">
+                <label for="asset-new-principal">Invested Cost ($)</label>
+                <input type="number" id="asset-new-principal" placeholder="0.00" min="0.01" step="0.01" required>
+              </div>
+              <div class="form-group">
+                <label for="asset-new-current-value">Current Value ($)</label>
+                <input type="number" id="asset-new-current-value" placeholder="0.00" min="0.01" step="0.01" required>
+              </div>
+            </div>
+            
+            <div class="form-grid mt-3" style="margin-top: 1rem;">
+              <div class="form-group">
+                <label for="asset-new-rate">Expected Return Rate (% p.a.)</label>
+                <input type="number" id="asset-new-rate" placeholder="e.g. 12.0" min="0" max="100" step="0.01" required>
+              </div>
+              <div class="form-group">
+                <label for="asset-new-date">Purchase Date</label>
+                <input type="date" id="asset-new-date" required>
+              </div>
+              <div class="form-group">
+                <label for="asset-new-source" style="color: hsl(var(--primary-base)); font-weight:700;">Funding Source</label>
+                <select id="asset-new-source" required style="border-color: hsl(var(--primary-base)); font-weight:600;">
+                  <option value="Existing Portfolio" selected>Existing Portfolio (Past assets - no Cash decrease)</option>
+                  <option value="Cash Balance">Cash Balance (Deducts from current liquid cash)</option>
+                </select>
+                <small class="text-muted" id="asset-cash-helper" style="font-size: 0.75rem; margin-top: 0.25rem; display: block;"></small>
+              </div>
+            </div>
+
+            <div class="form-group mt-3" style="margin-top: 1rem;">
+              <label for="asset-new-notes">Holding Notes</label>
+              <textarea id="asset-new-notes" rows="2" placeholder="Memo details or strategy..."></textarea>
+            </div>
+
+            <div class="d-flex-between" style="margin-top: 1.5rem; justify-content: flex-end; gap: 0.75rem;">
+              <button type="submit" class="btn btn-success">Record Asset Holding</button>
+            </div>
+          </form>
+        </div>
+
+        <hr style="border:0; border-top: 1px solid var(--border-color);">
+
+        <!-- Part 3: Transaction History of Selected Holding -->
+        <div>
+          <h4 style="font-size: 1rem; margin-bottom: 0.5rem; color: hsl(var(--primary-base));">Holding Transaction History</h4>
+          <p id="asset-history-helper-text" class="text-muted mb-3" style="font-size: 0.8rem;">Select a holding from the active holdings table above to view its specific transaction logs.</p>
+          <div class="table-responsive-wrapper" id="asset-history-table-container" style="display: none; max-height: 200px;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Source/Destination</th>
+                  <th>Amount ($)</th>
+                  <th>Notes</th>
+                  <th style="width: 60px; text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="asset-history-rows-target">
+                <!-- Rendered dynamically from holding transactions -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-manage-assets')">Close Ledger</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: LIQUIDATE/SELL ASSET HOLDING -->
+  <div class="modal-overlay" id="modal-liquidate-asset">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Liquidate/Sell Asset Holding</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-liquidate-asset')">✕</button>
+      </div>
+      <form id="modal-liquidate-asset-form">
+        <input type="hidden" id="liquidate-asset-id">
+        <div class="modal-body">
+          <div class="form-group mb-3">
+            <label>Asset Holding Reference</label>
+            <input type="text" id="liquidate-asset-name-display" readonly style="opacity: 0.75;">
+          </div>
+          <div class="form-group mb-3">
+            <label for="liquidate-asset-value">Final Sale/Liquidation Value ($)</label>
+            <input type="number" id="liquidate-asset-value" placeholder="0.00" min="0" step="0.01" required>
+            <small class="text-muted" style="font-size: 0.75rem; margin-top: 0.25rem; display: block;">
+              Enter the exact amount received from selling this asset.
+            </small>
+          </div>
+          <div class="form-group mb-4">
+            <label for="liquidate-asset-allocation" style="color: hsl(var(--primary-base)); font-weight:700;">Route Sale Proceeds To...</label>
+            <select id="liquidate-asset-allocation" required style="border-color: hsl(var(--primary-base)); font-weight:600;">
+              <option value="Cash Balance" selected>Cash Balance (Liquid)</option>
+              <option value="Other Investments">Other Investments</option>
+            </select>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
+            Selling this holding will mark its status as Closed and trigger a transfer of the final liquidation proceeds into your chosen account.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-liquidate-asset')">Cancel</button>
+          <button type="submit" class="btn btn-danger" style="background: hsl(var(--crimson-base)); border:none;">Confirm Sale / Liquidation</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD SIP / TOP-UP TO ASSET HOLDING -->
+  <div class="modal-overlay" id="modal-topup-asset">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 id="topup-asset-title">Add SIP / Top-up to Holding</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-topup-asset')">✕</button>
+      </div>
+      <form id="modal-topup-asset-form">
+        <input type="hidden" id="topup-asset-id">
+        <div class="modal-body">
+          <div class="form-group mb-3">
+            <label>Asset Reference</label>
+            <input type="text" id="topup-asset-name-display" readonly style="opacity: 0.75;">
+          </div>
+          <div class="form-group mb-3">
+            <label for="topup-asset-amount">Top-up Principal / SIP Amount ($)</label>
+            <input type="number" id="topup-asset-amount" placeholder="0.00" min="0.01" step="0.01" required>
+            <small class="text-muted" style="font-size: 0.75rem; margin-top: 0.25rem; display: block;">
+              Enter the SIP installment or top-up principal cost added today.
+            </small>
+          </div>
+          <div class="form-group mb-3">
+            <label for="topup-asset-date">Transaction Date</label>
+            <input type="date" id="topup-asset-date" required>
+          </div>
+          <div class="form-group mb-3">
+            <label for="topup-asset-source" style="color: hsl(var(--primary-base)); font-weight:700;">Funding Source</label>
+            <select id="topup-asset-source" required style="border-color: hsl(var(--primary-base)); font-weight:600;">
+              <option value="Existing Portfolio" selected>Existing Portfolio (Past assets - no Cash decrease)</option>
+              <option value="Cash Balance">Cash Balance (Deducts from current liquid cash)</option>
+            </select>
+            <small class="text-muted" id="topup-asset-cash-helper" style="font-size: 0.75rem; margin-top: 0.25rem; display: block;"></small>
+          </div>
+          <div class="form-group mb-1">
+            <label for="topup-asset-notes">Transaction Notes</label>
+            <textarea id="topup-asset-notes" rows="2" placeholder="e.g. Monthly SIP execution"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-topup-asset')">Cancel</button>
+          <button type="submit" class="btn btn-success">Record SIP Top-up</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT FIXED DEPOSIT CONTRACT -->
+  <div class="modal-overlay" id="modal-edit-fd">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Edit Fixed Deposit Contract</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-edit-fd')">✕</button>
+      </div>
+      <form id="modal-edit-fd-form">
+        <input type="hidden" id="edit-fd-id">
+        <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+          <div class="form-group mb-3">
+            <label for="edit-fd-name">Bank / Account Name</label>
+            <input type="text" id="edit-fd-name" required>
+          </div>
+          <div class="form-group mb-3">
+            <label for="edit-fd-principal">Principal Amount ($)</label>
+            <input type="number" id="edit-fd-principal" min="0.01" step="0.01" required>
+          </div>
+          <div class="form-group mb-3">
+            <label for="edit-fd-rate">Interest Rate (% p.a.)</label>
+            <input type="number" id="edit-fd-rate" min="0.01" max="100" step="0.01" required>
+          </div>
+          <div class="form-group mb-3">
+            <label for="edit-fd-tenure">Tenure (Days)</label>
+            <input type="number" id="edit-fd-tenure" min="1" step="1" required>
+          </div>
+          <div class="form-group mb-3">
+            <label for="edit-fd-date">Deposit Start Date</label>
+            <input type="date" id="edit-fd-date" required>
+          </div>
+          <div class="form-group mb-3">
+            <label for="edit-fd-source" style="color: hsl(var(--primary-base)); font-weight:700;">Funding Source</label>
+            <select id="edit-fd-source" required style="border-color: hsl(var(--primary-base)); font-weight:600;">
+              <option value="Existing Portfolio">Existing Portfolio (Past assets - no Cash decrease)</option>
+              <option value="Cash Balance">Cash Balance (Deducts from current liquid cash)</option>
+            </select>
+            <small class="text-muted" id="edit-fd-cash-helper" style="font-size: 0.75rem; margin-top: 0.25rem; display: block;"></small>
+          </div>
+          <div class="form-group mb-1">
+            <label for="edit-fd-notes">Contract Notes</label>
+            <textarea id="edit-fd-notes" rows="2" placeholder="Adjustment notes..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-edit-fd')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT STOCK / MUTUAL FUND HOLDING -->
+  <div class="modal-overlay" id="modal-edit-asset">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Edit Asset Holding</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-edit-asset')">✕</button>
+      </div>
+      <form id="modal-edit-asset-form">
+        <input type="hidden" id="edit-asset-id">
+        <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+          <div class="form-group mb-3">
+            <label for="edit-asset-name">Holding Name / Ticker</label>
+            <input type="text" id="edit-asset-name" required>
+          </div>
+          <div class="form-group mb-3">
+            <label for="edit-asset-principal">Invested Cost ($)</label>
+            <input type="number" id="edit-asset-principal" min="0.01" step="0.01" required>
+          </div>
+          <div class="form-group mb-3">
+            <label for="edit-asset-current-value">Current Value ($)</label>
+            <input type="number" id="edit-asset-current-value" min="0.01" step="0.01" required>
+          </div>
+          <div class="form-group mb-3">
+            <label for="edit-asset-rate">Expected Return Rate (% p.a.)</label>
+            <input type="number" id="edit-asset-rate" min="0" max="100" step="0.01" required>
+          </div>
+          <div class="form-group mb-3">
+            <label for="edit-asset-date">Purchase Date</label>
+            <input type="date" id="edit-asset-date" required>
+          </div>
+          <div class="form-group mb-3">
+            <label for="edit-asset-source" style="color: hsl(var(--primary-base)); font-weight:700;">Funding Source</label>
+            <select id="edit-asset-source" required style="border-color: hsl(var(--primary-base)); font-weight:600;">
+              <option value="Existing Portfolio">Existing Portfolio (Past assets - no Cash decrease)</option>
+              <option value="Cash Balance">Cash Balance (Deducts from current liquid cash)</option>
+            </select>
+            <small class="text-muted" id="edit-asset-cash-helper" style="font-size: 0.75rem; margin-top: 0.25rem; display: block;"></small>
+          </div>
+          <div class="form-group mb-1">
+            <label for="edit-asset-notes">Holding Notes</label>
+            <textarea id="edit-asset-notes" rows="2" placeholder="Adjustment notes..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-edit-asset')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT EXPENSE TRANSACTION -->
+  <div class="modal-overlay" id="modal-edit-expense">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Edit Expense Transaction</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-edit-expense')">✕</button>
+      </div>
+      <form id="modal-edit-expense-form">
+        <input type="hidden" id="edit-exp-id">
+        <div class="modal-body">
+          <div class="form-group mb-3">
+            <label for="edit-exp-date">Date</label>
+            <input type="date" id="edit-exp-date" required>
+          </div>
+          <div class="form-group mb-3">
+            <label for="edit-exp-category">Expense Category</label>
+            <select id="edit-exp-category" required>
+              <option value="Personal Expenses">Personal Expenses</option>
+              <option value="Grocery">Grocery</option>
+              <option value="Family Support">Family Support</option>
+              <option value="Bills">Bills</option>
+              <option value="Health">Health</option>
+              <option value="Investment">Investment</option>
+              <option value="Other Expenses">Other Expenses</option>
+            </select>
+          </div>
+          <div class="form-group mb-3">
+            <label for="edit-exp-amount">Amount ($)</label>
+            <input type="number" id="edit-exp-amount" placeholder="0.00" min="0.01" step="0.01" required>
+          </div>
+          <div class="form-group mb-4">
+            <label for="edit-exp-desc">Description</label>
+            <textarea id="edit-exp-desc" rows="2" placeholder="Adjustment memo..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-edit-expense')">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="background: hsl(var(--primary-base)); border:none;">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CORE SCRIPTS BINDINGS -->
+  <script src="backend.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>

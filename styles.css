@@ -1,0 +1,1173 @@
+/* 
+  Personal Financial Management System - Core Styling
+  Design Aesthetics: Modern Glassmorphism, Deep HSL Harmony, Dark/Light Modes, Slick Micro-Animations
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* =========================================================================
+   1. CORE TOKENS & RESPONSIVE DESIGN SYSTEM
+   ========================================================================= */
+:root {
+  /* HSL Color Palette Variables */
+  --hue-primary: 256; /* Elegant Purple */
+  --hue-emerald: 152; /* Income / Positive */
+  --hue-crimson: 354; /* Expense / Negative */
+  --hue-amber: 38;    /* Receivable / Loan */
+  
+  --primary-base: var(--hue-primary), 70%, 56%;
+  --emerald-base: var(--hue-emerald), 72%, 42%;
+  --crimson-base: var(--hue-crimson), 74%, 55%;
+  --amber-base: var(--hue-amber), 92%, 52%;
+
+  --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Transition timings */
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+  --border-radius-sm: 8px;
+  --border-radius-md: 14px;
+  --border-radius-lg: 24px;
+  --border-radius-xl: 32px;
+
+  /* Theme: Dark Mode (Default) */
+  --bg-app-gradient: radial-gradient(circle at 0% 0%, hsl(240, 20%, 8%) 0%, hsl(240, 25%, 3%) 100%);
+  --bg-card: hsla(240, 15%, 8%, 0.65);
+  --bg-card-hover: hsla(240, 15%, 12%, 0.8);
+  --bg-glass-modal: hsla(240, 20%, 5%, 0.85);
+  --bg-input: hsla(240, 10%, 6%, 0.8);
+  
+  --border-color: hsla(240, 10%, 18%, 0.4);
+  --border-color-glow: hsla(var(--primary-base), 0.25);
+  --border-color-glow-hover: hsla(var(--primary-base), 0.45);
+  
+  --text-main: hsl(0, 0%, 94%);
+  --text-muted: hsl(240, 6%, 65%);
+  --text-subtle: hsl(240, 5%, 45%);
+  
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.25), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.35), 0 10px 10px -5px rgba(0, 0, 0, 0.25);
+  --shadow-glow: 0 0 20px 2px hsla(var(--primary-base), 0.15);
+
+  --sidebar-width: 280px;
+  --glass-blur: 16px;
+}
+
+/* Theme: Light Mode Override */
+[data-theme="light"] {
+  --bg-app-gradient: linear-gradient(135deg, hsl(230, 20%, 96%) 0%, hsl(240, 30%, 93%) 100%);
+  --bg-card: hsla(240, 25%, 98%, 0.75);
+  --bg-card-hover: hsla(240, 25%, 100%, 0.95);
+  --bg-glass-modal: hsla(240, 30%, 96%, 0.9);
+  --bg-input: hsla(0, 0%, 100%, 0.85);
+
+  --border-color: hsla(240, 10%, 82%, 0.5);
+  --border-color-glow: hsla(var(--primary-base), 0.15);
+  --border-color-glow-hover: hsla(var(--primary-base), 0.3);
+
+  --text-main: hsl(240, 20%, 10%);
+  --text-muted: hsl(240, 10%, 40%);
+  --text-subtle: hsl(240, 5%, 60%);
+
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 10px 20px -3px rgba(240, 240, 250, 0.6), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 20px 30px -5px rgba(200, 200, 230, 0.4), 0 10px 15px -5px rgba(0, 0, 0, 0.05);
+  --shadow-glow: 0 0 20px 1px hsla(var(--primary-base), 0.08);
+}
+
+/* =========================================================================
+   2. ELEMENT RESET & CORE BASE STYLING
+   ========================================================================= */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-app-gradient);
+  color: var(--text-main);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background var(--transition-slow), color var(--transition-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+input, button, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  border: none;
+  outline: none;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsla(var(--primary-base), 0.4);
+}
+
+/* =========================================================================
+   3. STRUCTURAL GRID & ROUTING VIEWS
+   ========================================================================= */
+#app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Page views state transitions */
+.view-container {
+  display: none;
+  animation: viewFadeIn var(--transition-slow) forwards;
+  width: 100%;
+}
+
+.view-container.active-view {
+  display: block;
+}
+
+@keyframes viewFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================================================
+   4. SIDEBAR NAVIGATION WIDGET
+   ========================================================================= */
+aside.sidebar {
+  width: var(--sidebar-width);
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  background: var(--bg-card);
+  backdrop-filter: blur(var(--glass-blur));
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  padding: 2.5rem 1.5rem;
+  z-index: 100;
+  transition: width var(--transition-normal), transform var(--transition-normal);
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 3.5rem;
+  padding-left: 0.5rem;
+}
+
+.logo-icon {
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(135deg, hsl(var(--primary-base)) 0%, hsl(var(--hue-primary), 90%, 70%) 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px hsla(var(--primary-base), 0.3);
+  color: white;
+}
+
+.logo-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--text-main) 30%, hsl(var(--primary-base)) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: var(--font-display);
+}
+
+nav.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-grow: 1;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1.2rem;
+  border-radius: var(--border-radius-md);
+  color: var(--text-muted);
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  border: 1px solid transparent;
+}
+
+.nav-link svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--text-muted);
+  transition: stroke var(--transition-fast);
+}
+
+.nav-link:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-main);
+  border-color: var(--border-color);
+}
+
+.nav-link:hover svg {
+  stroke: hsl(var(--primary-base));
+}
+
+.nav-link.active-link {
+  background: linear-gradient(135deg, hsla(var(--primary-base), 0.15) 0%, hsla(var(--primary-base), 0.03) 100%);
+  color: var(--text-main);
+  border-color: hsla(var(--primary-base), 0.3);
+  box-shadow: var(--shadow-glow);
+}
+
+.nav-link.active-link svg {
+  stroke: hsl(var(--primary-base));
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border-color);
+  padding-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.user-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, hsla(var(--primary-base), 0.3) 0%, hsla(var(--primary-base), 0.7) 100%);
+  border: 2px solid var(--border-color-glow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: white;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.user-role {
+  font-size: 0.75rem;
+  color: var(--text-subtle);
+}
+
+/* =========================================================================
+   5. APP CONTENT SHELL & TOP BAR
+   ========================================================================= */
+main.app-viewport {
+  margin-left: var(--sidebar-width);
+  flex-grow: 1;
+  padding: 2.5rem 3.5rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left var(--transition-normal), padding var(--transition-normal);
+}
+
+header.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+}
+
+.page-title-area {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.page-subtitle {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+/* Toggle Switch Styles */
+.theme-toggle-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  width: 44px;
+  height: 44px;
+  border-radius: var(--border-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.theme-toggle-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-color-glow-hover);
+}
+
+.theme-toggle-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.logout-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--border-radius-md);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.logout-btn:hover {
+  border-color: hsla(var(--crimson-base), 0.4);
+  color: hsl(var(--crimson-base));
+  background: hsla(var(--crimson-base), 0.05);
+}
+
+/* =========================================================================
+   6. PREMIUM CARD & WIDGET WRAPPERS (GLASSMORPHISM)
+   ========================================================================= */
+.card {
+  background: var(--bg-card);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-md);
+  transition: border-color var(--transition-normal), background var(--transition-normal), transform var(--transition-fast);
+}
+
+.card:hover {
+  border-color: var(--border-color-glow-hover);
+  background: var(--bg-card-hover);
+}
+
+.card-title-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.card-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.card-header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* =========================================================================
+   7. DASHBOARD KPI CARDS & SUMMARY
+   ========================================================================= */
+.dashboard-grid-kpi {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.kpi-card {
+  position: relative;
+  overflow: hidden;
+  padding: 1.5rem 1.75rem;
+}
+
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background: var(--kpi-accent, hsl(var(--primary-base)));
+}
+
+.kpi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+}
+
+.kpi-icon-wrapper {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--border-radius-sm);
+  background: var(--kpi-accent-light, hsla(var(--primary-base), 0.1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--kpi-accent, hsl(var(--primary-base)));
+}
+
+.kpi-icon-wrapper svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+}
+
+.kpi-value {
+  font-size: 1.85rem;
+  font-weight: 700;
+  font-family: var(--font-display);
+  margin-bottom: 0.4rem;
+}
+
+.kpi-footer {
+  font-size: 0.8rem;
+  color: var(--text-subtle);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* Custom Accents per KPI card */
+.kpi-net-worth {
+  --kpi-accent: hsl(var(--primary-base));
+  --kpi-accent-light: hsla(var(--primary-base), 0.12);
+  grid-column: span 2;
+  background: radial-gradient(circle at 100% 0%, hsla(var(--primary-base), 0.06) 0%, var(--bg-card) 60%);
+}
+@media (max-width: 1200px) {
+  .kpi-net-worth { grid-column: span 1; }
+}
+
+.kpi-income {
+  --kpi-accent: hsl(var(--emerald-base));
+  --kpi-accent-light: hsla(var(--emerald-base), 0.12);
+}
+
+.kpi-expenses {
+  --kpi-accent: hsl(var(--crimson-base));
+  --kpi-accent-light: hsla(var(--crimson-base), 0.12);
+}
+
+.kpi-investments {
+  --kpi-accent: hsl(var(--primary-base));
+  --kpi-accent-light: hsla(var(--primary-base), 0.12);
+}
+
+.kpi-loans-given {
+  --kpi-accent: hsl(var(--amber-base));
+  --kpi-accent-light: hsla(var(--amber-base), 0.12);
+}
+
+.kpi-loans-taken {
+  --kpi-accent: hsl(var(--crimson-base));
+  --kpi-accent-light: hsla(var(--crimson-base), 0.12);
+}
+
+.kpi-cash {
+  --kpi-accent: hsl(var(--emerald-base));
+  --kpi-accent-light: hsla(var(--emerald-base), 0.12);
+}
+
+/* =========================================================================
+   8. VISUAL ANALYTICS CHARTS SECTION
+   ========================================================================= */
+.dashboard-grid-charts {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+@media (max-width: 1100px) {
+  .dashboard-grid-charts {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-card {
+  min-height: 380px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-canvas-container {
+  flex-grow: 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.distribution-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-top: 1.5rem;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.distribution-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.distribution-label-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.distribution-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.distribution-value {
+  font-weight: 600;
+}
+
+/* =========================================================================
+   9. FORMS & INPUT CONTROLS
+   ========================================================================= */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  padding: 0.75rem 1rem;
+  border-radius: var(--border-radius-md);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: hsl(var(--primary-base));
+  box-shadow: 0 0 10px 1px hsla(var(--primary-base), 0.15);
+}
+
+/* Buttons style system */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius-md);
+  font-weight: 600;
+  transition: all var(--transition-normal);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, hsl(var(--primary-base)) 0%, hsl(var(--hue-primary), 80%, 65%) 100%);
+  color: white;
+  box-shadow: 0 4px 14px hsla(var(--primary-base), 0.25);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px hsla(var(--primary-base), 0.4);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-color-glow-hover);
+}
+
+.btn-danger {
+  background: hsla(var(--crimson-base), 0.15);
+  border: 1px solid hsla(var(--crimson-base), 0.3);
+  color: hsl(var(--crimson-base));
+}
+
+.btn-danger:hover {
+  background: hsl(var(--crimson-base));
+  color: white;
+  box-shadow: 0 4px 14px hsla(var(--crimson-base), 0.25);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, hsl(var(--emerald-base)) 0%, hsl(var(--hue-emerald), 80%, 50%) 100%);
+  color: white;
+  box-shadow: 0 4px 14px hsla(var(--emerald-base), 0.2);
+}
+
+.btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px hsla(var(--emerald-base), 0.35);
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, hsl(var(--amber-base)) 0%, hsl(var(--hue-amber), 90%, 65%) 100%);
+  color: white;
+  box-shadow: 0 4px 14px hsla(var(--amber-base), 0.2);
+}
+
+.btn-warning:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px hsla(var(--amber-base), 0.35);
+}
+
+/* =========================================================================
+   10. MODALS (PORTALS & LAYERS)
+   ========================================================================= */
+.modal-overlay {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-normal) ease;
+}
+
+.modal-overlay.modal-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-container {
+  background: var(--bg-glass-modal);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--border-color);
+  width: 90%;
+  max-width: 520px;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  transform: scale(0.92);
+  transition: transform var(--transition-normal) cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+
+.modal-overlay.modal-active .modal-container {
+  transform: scale(1);
+}
+
+.modal-header {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.modal-close-btn {
+  background: transparent;
+  color: var(--text-muted);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.modal-close-btn:hover {
+  background: var(--border-color);
+  color: var(--text-main);
+}
+
+.modal-body {
+  padding: 2rem;
+}
+
+.modal-footer {
+  padding: 1.25rem 2rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+/* =========================================================================
+   11. DATA GRIDS & TABLES
+   ========================================================================= */
+.table-responsive-wrapper {
+  overflow-x: auto;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-color);
+}
+
+table.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+table.data-table th {
+  background: var(--bg-card-hover);
+  padding: 1rem 1.25rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+  font-family: var(--font-display);
+}
+
+table.data-table td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-main);
+  transition: background var(--transition-fast);
+}
+
+table.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+table.data-table tr:hover td {
+  background: hsla(var(--primary-base), 0.02);
+}
+
+/* Badges for status codes */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.badge-success {
+  background: hsla(var(--emerald-base), 0.12);
+  color: hsl(var(--emerald-base));
+  border: 1px solid hsla(var(--emerald-base), 0.2);
+}
+
+.badge-danger {
+  background: hsla(var(--crimson-base), 0.12);
+  color: hsl(var(--crimson-base));
+  border: 1px solid hsla(var(--crimson-base), 0.2);
+}
+
+.badge-warning {
+  background: hsla(var(--amber-base), 0.12);
+  color: hsl(var(--amber-base));
+  border: 1px solid hsla(var(--amber-base), 0.2);
+}
+
+.badge-muted {
+  background: var(--border-color);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+}
+
+/* =========================================================================
+   12. AUDIT TRAIL & LEDGER WIDGETS
+   ========================================================================= */
+.audit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 480px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.audit-item {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-color);
+  background: hsla(var(--primary-base), 0.01);
+  transition: all var(--transition-fast);
+}
+
+.audit-item:hover {
+  background: hsla(var(--primary-base), 0.03);
+  border-color: var(--border-color-glow);
+}
+
+.audit-marker {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 0.35rem;
+  flex-shrink: 0;
+  background: var(--audit-accent, hsl(var(--primary-base)));
+}
+
+.audit-item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.audit-msg {
+  line-height: 1.4;
+}
+
+.audit-meta {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text-subtle);
+  font-weight: 500;
+}
+
+/* Dynamic colors based on audit action types */
+.audit-inflow { --audit-accent: hsl(var(--emerald-base)); }
+.audit-outflow { --audit-accent: hsl(var(--crimson-base)); }
+.audit-pending { --audit-accent: hsl(var(--amber-base)); }
+.audit-transfer { --audit-accent: hsl(var(--primary-base)); }
+
+/* =========================================================================
+   13. AUTHENTICATION (LOGIN & SIGN UP SCREEN)
+   ========================================================================= */
+#auth-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: var(--bg-app-gradient);
+}
+
+.auth-container {
+  width: 100%;
+  max-width: 440px;
+  animation: authSlideUp var(--transition-slow) forwards;
+}
+
+@keyframes authSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-logo-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.auth-logo-icon {
+  width: 58px;
+  height: 58px;
+  background: linear-gradient(135deg, hsl(var(--primary-base)) 0%, hsl(var(--hue-primary), 90%, 70%) 100%);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px hsla(var(--primary-base), 0.35);
+  color: white;
+}
+
+.auth-logo-icon svg {
+  width: 30px;
+  height: 30px;
+}
+
+.auth-logo-title {
+  font-size: 1.65rem;
+  font-weight: 800;
+  font-family: var(--font-display);
+}
+
+.auth-toggle-prompt {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 1.5rem;
+}
+
+.auth-toggle-link {
+  color: hsl(var(--primary-base));
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 0.25rem;
+}
+
+.auth-toggle-link:hover {
+  text-decoration: underline;
+}
+
+/* =========================================================================
+   14. SYSTEM UTILITIES (TOASTS, LOADER, GRID CONTROLLERS)
+   ========================================================================= */
+.toast-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+.toast {
+  background: var(--bg-glass-modal);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--border-color);
+  padding: 1rem 1.5rem;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-main);
+  opacity: 0;
+  transform: translateY(16px);
+  animation: toastPop var(--transition-normal) forwards;
+  pointer-events: auto;
+  border-left: 4px solid var(--toast-accent, hsl(var(--primary-base)));
+}
+
+@keyframes toastPop {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.toast-success { --toast-accent: hsl(var(--emerald-base)); }
+.toast-error { --toast-accent: hsl(var(--crimson-base)); }
+.toast-info { --toast-accent: hsl(var(--primary-base)); }
+.toast-warning { --toast-accent: hsl(var(--amber-base)); }
+
+/* Grid systems */
+.grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+@media (max-width: 900px) {
+  .grid-2col { grid-template-columns: 1fr; }
+}
+
+.grid-3col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+@media (max-width: 1024px) {
+  .grid-3col { grid-template-columns: 1fr; }
+}
+
+.d-flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }
+.mb-4 { margin-bottom: 2rem; }
+
+.text-danger { color: hsl(var(--crimson-base)); }
+.text-success { color: hsl(var(--emerald-base)); }
+.text-warning { color: hsl(var(--amber-base)); }
+.text-muted { color: var(--text-muted); }
+
+/* Global Loading Spinner overlay */
+#loading-overlay {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-fast) ease;
+}
+
+#loading-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--border-color);
+  border-top-color: hsl(var(--primary-base));
+  border-radius: 50%;
+  animation: spinnerRotate 0.8s linear infinite;
+}
+
+@keyframes spinnerRotate {
+  to { transform: rotate(360deg); }
+}
+
+/* =========================================================================
+   15. MOBILE ADAPTABILITY & COLLAPSIBLE SIDEBARS
+   ========================================================================= */
+.sidebar-mobile-toggle {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* Sidebar responsive collapse */
+  aside.sidebar {
+    transform: translateX(-100%);
+    box-shadow: none;
+  }
+  
+  aside.sidebar.sidebar-open {
+    transform: translateX(0);
+    box-shadow: var(--shadow-lg);
+  }
+  
+  main.app-viewport {
+    margin-left: 0;
+    padding: 1.5rem;
+    padding-top: 5.5rem; /* Room for header toggle */
+  }
+  
+  header.top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: var(--bg-card);
+    backdrop-filter: blur(var(--glass-blur));
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.75rem 1.5rem;
+    margin-bottom: 0;
+    z-index: 90;
+  }
+  
+  .sidebar-mobile-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-card-hover);
+    border: 1px solid var(--border-color);
+    width: 40px;
+    height: 40px;
+    border-radius: var(--border-radius-sm);
+  }
+
+  .sidebar-mobile-toggle svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+  }
+}
