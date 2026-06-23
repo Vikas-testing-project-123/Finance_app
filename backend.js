@@ -18,6 +18,20 @@ function formatDate(dateString) {
   return [year, month.padStart(2, '0'), day.padStart(2, '0')].join('-');
 }
 
+// Helper: Decode JWT token payload client-side
+function decodeJwt(token) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+}
+
 // =========================================================================
 // 1. RELATIONAL DATABASE SIMULATOR (localStorage Engine)
 // =========================================================================
@@ -81,6 +95,17 @@ class RelationalDatabase {
 
   save() {
     localStorage.setItem(this.storageKey, JSON.stringify(this.tables));
+    const token = localStorage.getItem('aura_auth_token');
+    if (token) {
+      fetch('/api/database', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ tables: this.tables })
+      }).catch(err => console.error('Failed to sync to server database:', err));
+    }
     const syncKey = this.getSyncKey();
     if (syncKey) {
       this.pushToCloud().then(ok => {
@@ -88,6 +113,7 @@ class RelationalDatabase {
       });
     }
   }
+
 
   getSyncKey() {
     return localStorage.getItem('pfm_cloud_sync_key') || '';
@@ -805,6 +831,104 @@ const API = {
     });
   },
 
+  loadedFromServer: false,
+
+  async ensureDbLoaded(headers) {
+    if (this.loadedFromServer) return;
+    const authHeader = headers && headers['Authorization'];
+    const token = authHeader ? authHeader.replace('Bearer ', '') : localStorage.getItem('aura_auth_token');
+    if (!token) return;
+
+    try {
+      const res = await fetch('/api/database', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        const response = await res.json();
+        if (response.success && response.data) {
+          db.tables = response.data;
+          localStorage.setItem(db.storageKey, JSON.stringify(db.tables));
+        } else if (response.success && !response.data) {
+          const localData = localStorage.getItem(db.storageKey);
+          let hasMigrated = false;
+          if (localData) {
+            try {
+              const parsed = JSON.parse(localData);
+              if (parsed.users && parsed.users.length > 0) {
+                db.tables = parsed;
+                console.log("Migrating existing local storage database to the server...");
+                // Force sync to server database
+                await fetch('/api/database', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                  },
+                  body: JSON.stringify({ tables: db.tables })
+                });
+                hasMigrated = true;
+              }
+            } catch (e) {
+              console.error('Failed to parse existing localStorage database for migration:', e);
+            }
+          }
+
+          if (!hasMigrated) {
+            db.tables = {
+              users: [],
+              income: [],
+              expenses: [],
+              investments: [],
+              loansTaken: [],
+              loansGiven: [],
+              loanRepayments: [],
+              investmentTransactions: [],
+              auditTrail: [],
+              fixedDeposits: [],
+              assetHoldings: []
+            };
+            
+            const username = localStorage.getItem('aura_username') || 'User';
+            const decoded = decodeJwt(token);
+            const userId = decoded ? decoded.id : token;
+            
+            db.tables.users.push({
+              id: userId,
+              username: username,
+              openingBalance: 0,
+              createdAt: formatDate()
+            });
+
+            const types = [
+              'Fixed Deposit (FD)', 'Stocks', 
+              'Mutual Funds', 'Gold', 'Gullak (Piggy Bank)', 
+              'Emergency Fund', 'Other Investments'
+            ];
+            types.forEach(type => {
+              db.tables.investments.push({
+                id: generateId(),
+                userId,
+                type,
+                amountInvested: 0,
+                currentValue: 0,
+                notes: '',
+                lastUpdated: formatDate()
+              });
+            });
+
+            db.logAudit(userId, 'USER_REGISTERED', `Welcome to your Financial Planner, ${username}! Account created.`, { username });
+            db.save();
+          }
+        }
+        this.loadedFromServer = true;
+      }
+    } catch (e) {
+      console.error('Failed to load database from server:', e);
+    }
+  },
+
   // Helper to fetch authorization header and find user
   getCurrentUser(headers = {}) {
     const auth = headers['Authorization'];
@@ -812,71 +936,57 @@ const API = {
       throw new Error('Unauthorized: Missing or invalid token');
     }
     const token = auth.replace('Bearer ', '');
-    const user = db.tables.users.find(u => u.id === token);
-    if (!user) {
+    const decoded = decodeJwt(token);
+    if (!decoded || !decoded.id) {
       throw new Error('Unauthorized: Invalid session credentials');
     }
-    return user.id;
+    const userId = decoded.id;
+    let user = db.tables.users.find(u => u.id === userId);
+    if (!user) {
+      user = {
+        id: userId,
+        username: decoded.username || 'User',
+        openingBalance: 0,
+        createdAt: formatDate()
+      };
+      db.tables.users.push(user);
+    }
+    return userId;
   },
 
   // Authentication
   async register(username, password, openingBalance) {
-    return this.simulateNetwork(() => {
-      if (!username || username.trim().length < 2) {
-        throw new Error('Username must be at least 2 characters.');
-      }
-      const existing = db.tables.users.find(u => u.username.toLowerCase() === username.toLowerCase());
-      if (existing) {
-        throw new Error('Username is already taken.');
-      }
-
-      const userId = generateId();
-      const newUser = {
-        id: userId,
-        username: username.trim(),
-        passwordHash: 'hashed_' + password, // Simulated hash
-        openingBalance: parseFloat(openingBalance || 0),
-        createdAt: formatDate()
-      };
-      
-      db.tables.users.push(newUser);
-      db.logAudit(userId, 'USER_REGISTERED', `Welcome to your Financial Planner, ${newUser.username}! Account created.`, { username: newUser.username });
-      
-      // Auto seed starting investments for new users so the dashboard looks alive and structured
-      const types = [
-        'Fixed Deposit (FD)', 'Stocks', 
-        'Mutual Funds', 'Gold', 'Gullak (Piggy Bank)', 
-        'Emergency Fund', 'Other Investments'
-      ];
-      types.forEach(type => {
-        db.tables.investments.push({
-          id: generateId(),
-          userId,
-          type,
-          amountInvested: 0,
-          currentValue: 0,
-          notes: '',
-          lastUpdated: formatDate()
-        });
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, openingBalance })
       });
-
-      db.save();
-      return { token: userId, username: newUser.username };
-    });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Registration failed');
+      
+      this.loadedFromServer = false;
+      return { success: true, data: data.data };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
   },
 
   async login(username, password) {
-    return this.simulateNetwork(() => {
-      const user = db.tables.users.find(u => u.username.toLowerCase() === username.toLowerCase());
-      if (!user) {
-        throw new Error('User not found.');
-      }
-      // Demo account bypasses password check for convenience, others check
-      if (user.id !== 'demo_user_archana' && user.passwordHash !== 'hashed_' + password) {
-        throw new Error('Invalid username or password.');
-      }
-      return { token: user.id, username: user.username };
-    });
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Login failed');
+
+      this.loadedFromServer = false;
+      return { success: true, data: data.data };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
   },
 
   // Income Endpoints
@@ -951,6 +1061,7 @@ const API = {
   },
 
   async getSyncKey(headers) {
+    await this.ensureDbLoaded(headers);
     return this.simulateNetwork(() => db.getSyncKey());
   },
 
